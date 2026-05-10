@@ -79,12 +79,24 @@
 </style>
 </head>
 <body>
+<div id="login-screen" style="display:none; position:fixed; inset:0; background:var(--bg); z-index:100; display:flex; align-items:center; justify-content:center; padding:1rem;">
+  <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:2rem; max-width:420px; width:100%;">
+    <div style="font-family:'DM Mono',monospace; font-size:13px; color:var(--text2); margin-bottom:1.5rem; letter-spacing:0.05em;">taken.app — setup</div>
+    <p style="font-size:14px; color:var(--text2); margin-bottom:1.25rem; line-height:1.6;">Voer je GitHub Personal Access Token in. Deze wordt enkel lokaal opgeslagen in je browser en staat nooit in de code.</p>
+    <input type="password" id="token-input" placeholder="github_pat_..." style="width:100%; margin-bottom:10px; font-family:'DM Mono',monospace; font-size:12px;" />
+    <div style="font-family:'DM Mono',monospace; font-size:11px; color:var(--danger); margin-bottom:12px; min-height:16px;" id="login-error"></div>
+    <button class="add-btn" style="width:100%;" onclick="doLogin()">Verbinden</button>
+    <p style="font-size:11px; color:var(--text3); margin-top:1rem; font-family:'DM Mono',monospace; line-height:1.6;">Maak een fine-grained token aan op github.com/settings/tokens met Contents: read & write voor de repo maandelijkse-herinner-app.</p>
+  </div>
+</div>
+
 <div class="container">
   <header>
     <span class="logo">taken.app</span>
     <div class="header-right">
       <span class="sync-status" id="sync-status">laden...</span>
       <button class="sync-btn" id="sync-btn" onclick="syncNow()">&#8635; sync</button>
+      <button class="sync-btn" onclick="doLogout()" title="Token verwijderen">&#128274;</button>
       <div class="month-nav">
         <button class="nav-btn" onclick="changeMonth(-1)">&#8249;</button>
         <span class="month-label" id="month-label"></span>
@@ -135,7 +147,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const GITHUB_TOKEN = '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';
+let GITHUB_TOKEN = localStorage.getItem('gh_token') || '';
 const GITHUB_REPO = 'Rdeco123/maandelijkse-herinner-app';
 const DATA_FILE = 'data.json';
 const API_BASE = 'https://api.github.com/repos/' + GITHUB_REPO + '/contents/' + DATA_FILE;
@@ -366,8 +378,37 @@ function deleteTask(id) {
   render();
 }
 
+function showLogin() {
+  document.getElementById('login-screen').style.display = 'flex';
+}
+
+function hideLogin() {
+  document.getElementById('login-screen').style.display = 'none';
+}
+
+function doLogin() {
+  const val = document.getElementById('token-input').value.trim();
+  if (!val) { document.getElementById('login-error').textContent = 'Token mag niet leeg zijn.'; return; }
+  GITHUB_TOKEN = val;
+  localStorage.setItem('gh_token', val);
+  hideLogin();
+  loadFromGitHub();
+}
+
+function doLogout() {
+  if (!confirm('Token verwijderen? Je moet opnieuw inloggen.')) return;
+  localStorage.removeItem('gh_token');
+  GITHUB_TOKEN = '';
+  showLogin();
+}
+
 document.getElementById('new-date').value = new Date().toISOString().split('T')[0];
-loadFromGitHub();
+
+if (!GITHUB_TOKEN) {
+  showLogin();
+} else {
+  loadFromGitHub();
+}
 </script>
 </body>
 </html>
