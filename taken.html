@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mijn Taken</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F7F6F2;
+    --surface: #FFFFFF;
+    --surface2: #F0EFE9;
+    --border: rgba(0,0,0,0.1);
+    --border2: rgba(0,0,0,0.2);
+    --text: #1A1A1A;
+    --text2: #6B6B6B;
+    --text3: #ABABAB;
+    --accent: #1D9E75;
+    --accent-bg: #E1F5EE;
+    --warn: #BA7517;
+    --warn-bg: #FAEEDA;
+    --danger: #A32D2D;
+    --danger-bg: #FCEBEB;
+    --info: #185FA5;
+    --info-bg: #E6F1FB;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2rem 1rem;
+  }
+
+  .container { max-width: 680px; margin: 0 auto; }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+  }
+
+  .logo {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--text2);
+    letter-spacing: 0.05em;
+  }
+
+  .month-nav {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .nav-btn {
+    width: 30px; height: 30px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border2);
+    background: var(--surface);
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text);
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+  }
+  .nav-btn:hover { background: var(--surface2); }
+
+  .month-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    min-width: 130px;
+    text-align: center;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 1.25rem;
+  }
+
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text2);
+    margin-bottom: 6px;
+  }
+
+  .stat-val {
+    font-size: 28px;
+    font-weight: 300;
+    color: var(--text);
+  }
+
+  .progress-wrap {
+    height: 3px;
+    background: var(--surface2);
+    border-radius: 2px;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .tab {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border2);
+    background: var(--surface);
+    cursor: pointer;
+    color: var(--text2);
+    transition: all 0.15s;
+  }
+
+  .tab.active {
+    background: var(--text);
+    color: #fff;
+    border-color: var(--text);
+  }
+
+  .task-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 1.5rem;
+    min-height: 60px;
+  }
+
+  .task-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: opacity 0.2s;
+  }
+
+  .task-card.done { opacity: 0.45; }
+  .task-card.done .task-title { text-decoration: line-through; }
+
+  .check-btn {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border2);
+    background: none;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    color: var(--accent);
+    transition: all 0.15s;
+  }
+
+  .check-btn.checked {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  .task-info { flex: 1; min-width: 0; }
+
+  .task-title {
+    font-size: 14px;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .task-meta {
+    font-size: 12px;
+    color: var(--text3);
+    margin-top: 2px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .task-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+  .badge {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    padding: 2px 9px;
+    border-radius: 20px;
+  }
+
+  .badge-recurrent { background: var(--accent-bg); color: var(--accent); }
+  .badge-eenmalig { background: var(--warn-bg); color: var(--warn); }
+  .badge-urgent { background: var(--danger-bg); color: var(--danger); }
+
+  .del-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text3);
+    font-size: 16px;
+    line-height: 1;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: color 0.15s;
+  }
+  .del-btn:hover { color: var(--danger); }
+
+  .empty {
+    text-align: center;
+    padding: 2.5rem;
+    color: var(--text3);
+    font-size: 14px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .add-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+  }
+
+  .add-title {
+    font-size: 13px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text2);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .form-row { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+
+  input[type="text"], input[type="date"], select {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    padding: 8px 12px;
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+    flex: 1;
+    min-width: 140px;
+    transition: border-color 0.15s;
+  }
+
+  input[type="text"]:focus, input[type="date"]:focus, select:focus {
+    border-color: var(--accent);
+  }
+
+  .add-btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    padding: 8px 18px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--text);
+    background: var(--text);
+    color: #fff;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.15s;
+  }
+  .add-btn:hover { opacity: 0.8; }
+
+  footer {
+    text-align: center;
+    margin-top: 2.5rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text3);
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <span class="logo">taken.app</span>
+    <div class="month-nav">
+      <button class="nav-btn" onclick="changeMonth(-1)">&#8249;</button>
+      <span class="month-label" id="month-label"></span>
+      <button class="nav-btn" onclick="changeMonth(1)">&#8250;</button>
+    </div>
+  </header>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-label">Totaal</div><div class="stat-val" id="stat-total">0</div></div>
+    <div class="stat"><div class="stat-label">Afgerond</div><div class="stat-val" id="stat-done">0</div></div>
+    <div class="stat"><div class="stat-label">Open</div><div class="stat-val" id="stat-open">0</div></div>
+  </div>
+
+  <div class="progress-wrap"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="setTab('alle',this)">Alle</button>
+    <button class="tab" onclick="setTab('recurrent',this)">Recurrent</button>
+    <button class="tab" onclick="setTab('eenmalig',this)">Eenmalig</button>
+    <button class="tab" onclick="setTab('urgent',this)">Urgent</button>
+    <button class="tab" onclick="setTab('open',this)">Open</button>
+  </div>
+
+  <div class="task-list" id="task-list"></div>
+
+  <div class="add-section">
+    <div class="add-title">+ nieuwe taak</div>
+    <div class="form-row">
+      <input type="text" id="new-title" placeholder="Taaknaam (bv. TOB aangifte indienen)" />
+    </div>
+    <div class="form-row">
+      <select id="new-type">
+        <option value="recurrent">Recurrent (maandelijks)</option>
+        <option value="eenmalig">Eenmalig</option>
+        <option value="urgent">Urgent</option>
+      </select>
+      <input type="date" id="new-date" />
+    </div>
+    <div class="form-row">
+      <input type="text" id="new-note" placeholder="Notitie (optioneel)" />
+      <button class="add-btn" onclick="addTask()">Toevoegen</button>
+    </div>
+  </div>
+
+  <footer>data opgeslagen in browser &mdash; github pages</footer>
+</div>
+
+<script>
+const MONTHS = ['Januari','Februari','Maart','April','Mei','Juni','Juli','Augustus','September','Oktober','November','December'];
+
+let now = new Date();
+let currentMonth = now.getMonth();
+let currentYear = now.getFullYear();
+let activeTab = 'alle';
+
+let tasks = JSON.parse(localStorage.getItem('ralph_tasks_v1') || 'null') || [
+  { id: 1, title: 'TOB aangifte indienen', type: 'recurrent', note: 'Deadline: einde van de maand' },
+  { id: 2, title: 'IBKR portefeuille check', type: 'recurrent', note: 'Dividend tracker bijwerken' },
+  { id: 3, title: 'ITAA studieplanning nakijken', type: 'recurrent', note: 'Voortgang toetsen' },
+];
+
+let doneDates = JSON.parse(localStorage.getItem('ralph_done_v1') || '{}');
+
+function save() {
+  localStorage.setItem('ralph_tasks_v1', JSON.stringify(tasks));
+  localStorage.setItem('ralph_done_v1', JSON.stringify(doneDates));
+}
+
+function key(id) { return currentYear + '-' + currentMonth + '-' + id; }
+function isDone(id) { return !!doneDates[key(id)]; }
+
+function toggleDone(id) {
+  const k = key(id);
+  if (doneDates[k]) delete doneDates[k]; else doneDates[k] = true;
+  save(); render();
+}
+
+function changeMonth(d) {
+  currentMonth += d;
+  if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+  if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+  render();
+}
+
+function setTab(tab, btn) {
+  activeTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function visibleTasks() {
+  let t = tasks.filter(task => {
+    if (task.type === 'eenmalig' && task.dueDate) {
+      const d = new Date(task.dueDate);
+      return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+    }
+    return true;
+  });
+  if (activeTab === 'recurrent') t = t.filter(x => x.type === 'recurrent');
+  else if (activeTab === 'eenmalig') t = t.filter(x => x.type === 'eenmalig');
+  else if (activeTab === 'urgent') t = t.filter(x => x.type === 'urgent');
+  else if (activeTab === 'open') t = t.filter(x => !isDone(x.id));
+  return t;
+}
+
+function formatDate(d) {
+  if (!d) return '';
+  const dt = new Date(d + 'T00:00:00');
+  return dt.toLocaleDateString('nl-BE', { day: 'numeric', month: 'short' });
+}
+
+function render() {
+  document.getElementById('month-label').textContent = MONTHS[currentMonth] + ' ' + currentYear;
+
+  const allMonth = tasks.filter(t => {
+    if (t.type === 'eenmalig' && t.dueDate) {
+      const d = new Date(t.dueDate);
+      return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+    }
+    return true;
+  });
+
+  const doneCount = allMonth.filter(t => isDone(t.id)).length;
+  const totalCount = allMonth.length;
+  document.getElementById('stat-total').textContent = totalCount;
+  document.getElementById('stat-done').textContent = doneCount;
+  document.getElementById('stat-open').textContent = totalCount - doneCount;
+  const pct = totalCount ? Math.round(doneCount / totalCount * 100) : 0;
+  document.getElementById('progress-fill').style.width = pct + '%';
+
+  const vis = visibleTasks();
+  const list = document.getElementById('task-list');
+
+  if (!vis.length) {
+    list.innerHTML = '<div class="empty">geen taken voor deze filter</div>';
+    return;
+  }
+
+  list.innerHTML = vis.map(t => {
+    const done = isDone(t.id);
+    const badge = t.type === 'recurrent'
+      ? '<span class="badge badge-recurrent">maandelijks</span>'
+      : t.type === 'urgent'
+      ? '<span class="badge badge-urgent">urgent</span>'
+      : '<span class="badge badge-eenmalig">eenmalig</span>';
+    const meta = [t.note, t.dueDate ? formatDate(t.dueDate) : ''].filter(Boolean).join(' · ');
+    return '<div class="task-card' + (done ? ' done' : '') + '">'
+      + '<button class="check-btn' + (done ? ' checked' : '') + '" onclick="toggleDone(' + t.id + ')" aria-label="Toggle">'
+      + (done ? '&#10003;' : '') + '</button>'
+      + '<div class="task-info">'
+      + '<div class="task-title">' + escHtml(t.title) + '</div>'
+      + (meta ? '<div class="task-meta">' + escHtml(meta) + '</div>' : '')
+      + '</div>'
+      + '<div class="task-right">' + badge
+      + '<button class="del-btn" onclick="deleteTask(' + t.id + ')" aria-label="Verwijder">&#215;</button>'
+      + '</div></div>';
+  }).join('');
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function addTask() {
+  const title = document.getElementById('new-title').value.trim();
+  if (!title) return;
+  const type = document.getElementById('new-type').value;
+  const note = document.getElementById('new-note').value.trim();
+  const dueDate = document.getElementById('new-date').value;
+  tasks.push({ id: Date.now(), title, type, note, dueDate });
+  save();
+  document.getElementById('new-title').value = '';
+  document.getElementById('new-note').value = '';
+  render();
+}
+
+function deleteTask(id) {
+  if (!confirm('Taak verwijderen?')) return;
+  tasks = tasks.filter(t => t.id !== id);
+  save(); render();
+}
+
+document.getElementById('new-date').value = new Date().toISOString().split('T')[0];
+render();
+</script>
+</body>
+</html>
